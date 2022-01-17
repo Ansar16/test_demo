@@ -101,7 +101,7 @@ const e = require('express');
   try {
     
     const client = await pool.connect();
-    const result = await client.query('SELECT * FROM salesforce.order');
+    const result = await client.query('SELECT * FROM salesforce.Order__c');
     const results = { 'results': (result) ? result.rows : null};
     console.log('DB75 Response->',result)
     res.send(results);
@@ -125,10 +125,10 @@ const e = require('express');
     for(let i in orderDetails){
      if(orderDetails[i].OrderStatus == 'Canceled')orderDetails[i].OrderStatus = 'Cancelled';
      if(orderDetails[i].AmazonOrderId != "" && orderDetails[i].SalesChannel != "" && orderDetails[i].OrderStatus != "" && orderDetails[i].MarketplaceId != "" && orderDetails[i].OrderType != "" && orderDetails[i].PurchaseDate != "" && AccountId != ""){
-          pool.query(`INSERT INTO salesforce.order(ERP7__AmazonOrderId__c, ERP7__SalesChannel__c, Status, ERP7__MarketplaceId__c, ERP7__Type__c, EffectiveDate, ERP7__Payment_Mode__c, ERP7__Shipment_Type__c, ERP7__Amount__c, ERP7__Shipped_Quantity__c, ERP7__Is_Back_Order__c,AccountId,ERP7__Active__c)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (ERP7__AmazonOrderId__c) DO NOTHING` , [`${orderDetails[i].AmazonOrderId}`,`${orderDetails[i].SalesChannel}`, `${orderDetails[i].OrderStatus}`, `${orderDetails[i].MarketplaceId}`, `${orderDetails[i].OrderType}`, `${orderDetails[i].PurchaseDate}`, `${orderDetails[i].PaymentMethodDetails}`, `${orderDetails[i].ShipmentServiceLevelCategory}`, `${orderDetails[i].OrderTotal.Amount}`, `${orderDetails[i].NumberOfItemsShipped}`, `${orderDetails[i].IsReplacementOrder}`, `${AccountId}`, `${isActive}`], (err, res) => {
+          pool.query(`INSERT INTO salesforce.Order__c(External_ID__c,Active__c)VALUES($1,$2) ON CONFLICT (External_ID__c) DO NOTHING` , [`${orderDetails[i].AmazonOrderId}`,`${isActive}`], (err, res) => {
           //pool.query(`INSERT INTO salesforce.order(ERP7__AmazonOrderId__c, ERP7__SalesChannel__c, Status, ERP7__MarketplaceId__c, ERP7__Type__c, EffectiveDate, AccountId)VALUES($1,$2,$3,$4,$5,$6,$7)`, [`${orderDetails[i].AmazonOrderId}`,`${orderDetails[i].SalesChannel}`, `${orderDetails[i].OrderStatus}`, `${orderDetails[i].MarketplaceId}`, `${orderDetails[i].OrderType}`, `${orderDetails[i].PurchaseDate}`,`${AccountId}`], (err, res) => {   
          if (err) {
-                console.log("Error-> Failed to insert data into amazon_orders");
+                console.log("Error-> Failed to insert data into Salesforce List Of Data");
                 console.log(err);
             }else{
               console.log('DB res->',res);
@@ -161,6 +161,3 @@ const e = require('express');
     console.log('Error-> ',e);
   }
 })();
-
-
-    
